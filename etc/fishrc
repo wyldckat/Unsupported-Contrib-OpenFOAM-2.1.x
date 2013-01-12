@@ -47,7 +47,7 @@ set -x WM_PROJECT_VERSION   2.1.x
 # Location of the OpenFOAM installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set -l foamInstall ~/$WM_PROJECT
-# foamInstall=~$WM_PROJECT
+# foamInstall=~/$WM_PROJECT
 # foamInstall=/opt/$WM_PROJECT
 # foamInstall=/usr/local/$WM_PROJECT
 #
@@ -129,57 +129,51 @@ set -x WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 # unset is equivalent to $WM_PROJECT_INST_DIR/site
 test -d "$WM_PROJECT_SITE";
     and set -x WM_PROJECT_SITE;
-    or set -e WM_PROJECT_SITE;
+    or  set -e WM_PROJECT_SITE
 
 # Location of user files
 # ~~~~~~~~~~~~~~~~~~~~~~
 set -x WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 
+# Print debug info if run from terminal and FOAM_VERBOSE is set
+function foamPrintDebug
+    set -q FOAM_VERBOSE; and set -q PS1;
+        and echo "$argv"
+end
+
+
 # Source files, possibly with some verbosity
 function foamSource
-    for i in $argv
-        set fileToSource (sh $WM_PROJECT_DIR/bin/foamEtcFile $i)
-        test -r "$fileToSource";
-            and set -q FOAM_VERBOSE;
-            and set -q PS1;
-            and echo "Sourcing file $i";
-            and . $fileToSource
+    set fileToSource (sh $WM_PROJECT_DIR/bin/foamEtcFile $argv)
+
+    if test -r "$fileToSource"
+        foamPrintDebug "Sourcing file $argv"
+        . $fileToSource
     end
 end
 
 
 # Evaluate command-line parameters
 function foamEval
-    for i in $argv[(seq 1 (count $argv))]
+    for i in $argv
         switch $i
             case '-*'
                 # stray option (not meant for us here) -> get out
                 break
             case '*='
                 # name=       -> set -e name
-                if set -q FOAM_VERBOSE; and set -q PS1
-                    echo "Erasing $i"
-                end
-                eval (echo $i | sed 's/\(.*\)=/set -e \1/g')
+                foamPrintDebug "Erasing $i"
+                eval (echo $i | sed 's/\(.*\)=/set -ge \1/g')
             case '*=*'
                 # name=value  -> set -x name value
-                if set -q FOAM_VERBOSE; and set -q PS1
-                    echo "Exporting $i"
-                end
+                foamPrintDebug "Exporting $i"
                 eval (echo $i | sed 's/\(.*\)=\(.*\)/set -gx \1 \2/g')
             case '*'
                 # filename: source it
-                if test -f "$i"
-                    if set -q FOAM_VERBOSE; and set -q PS1
-                        echo "Sourcing file $i"
-                    end
-                    . (sh $WM_PROJECT_DIR/bin/foamEtcFile -silent $i)
-                else
-                    if set -q FOAM_VERBOSE; and set -q PS1
-                        echo "$i is not a file"
-                    end
-                end
+                test -f "$i";
+                    and . $i;
+                    or foamSource -silent $i
         end
     end
 end
@@ -190,26 +184,28 @@ foamSource config/prefs.fish
 
 # Evaluate command-line parameters and record settings for later
 # these can be used to set/unset values, or specify alternative pref files
-set -x FOAM_SETTINGS $argv;
+set -x FOAM_SETTINGS $argv
 foamEval $FOAM_SETTINGS
+
 
 # Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function foamClean
+    set -e tmpPath
+    set -e deleteFromPath
+
     # Remove old path elements
     for pathToRemove in $argv[(seq 2 (count $argv))]
-        for i in (seq (count $$argv[1]))
-            echo $$argv[1][$i] | grep -e "^$pathToRemove" >> /dev/null ^&1;
-                and set deleteFromPath $deleteFromPath $i
+        for pathElement in (seq (count $$argv[1]))
+            test (echo $$argv[1][$pathElement] | grep -e "^$pathToRemove");
+                and set deleteFromPath $deleteFromPath $pathElement
         end
     end
 
-    test (count $deleteFromPath) != 0;
+    set -q deleteFromPath;
         and set -e $argv[1][$deleteFromPath]
 
     # Remove duplicates
-    set -e tmpPath
-
     for pathElement in $$argv[1]
         not contains (echo $pathElement | \sed -e "s@/*\$@@g") $tmpPath;
             and set tmpPath $tmpPath $pathElement
@@ -259,5 +255,7 @@ test -n $LD_PRELOAD; and foamClean LD_PRELOAD
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
 functions -e foamEval
+functions -e foamPrintDebug
+functions -e foamSource
 
 # ----------------------------------------------------------------- end-of-file

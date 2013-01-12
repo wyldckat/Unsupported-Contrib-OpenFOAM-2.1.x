@@ -32,7 +32,7 @@
 
 function prependToVar
     for i in $argv[(seq 2 (count $argv))]
-        set -x $argv[1] $i $$argv[1]
+        set -gx $argv[1] $i $$argv[1]
     end
 end
 
@@ -64,7 +64,7 @@ switch "$WM_ARCH"
                         set -x WM_CXXFLAGS -m64 -fPIC
                         set -x WM_LDFLAGS -m64
                     case '*'
-                        echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+                        echo "Unknown WM_ARCH_OPTION $WM_ARCH_OPTION, should be 32 or 64"
                 end
             case ia64
                 set -g WM_ARCH linuxIA64
@@ -150,7 +150,8 @@ set -x FOAM_SOLVERS $FOAM_APP/solvers
 set -x FOAM_RUN $WM_PROJECT_USER_DIR/run
 
 # add wmake to the path - not required for runtime only environment
-test -d "$WM_DIR"; and prependToVar PATH $WM_DIR
+test -d "$WM_DIR";
+    and prependToVar PATH $WM_DIR
 
 # add OpenFOAM scripts to the path
 prependToVar PATH $WM_PROJECT_DIR/bin
@@ -173,7 +174,7 @@ set -e GMP_ARCH_PATH
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if test -z "$foamCompiler"
     set -g foamCompiler system
-    echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" ^&1
+    echo "Warning in $WM_PROJECT_DIR/etc/config/settings.fish:" ^&1
     echo "    foamCompiler not set, using $foamCompiler" ^&1
 end
 
@@ -207,7 +208,7 @@ switch $foamCompiler
                 set -g clang_version llvm-svn
             case '*'
                 echo
-                echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
+                echo "Warning in $WM_PROJECT_DIR/etc/config/settings.fish:"
                 echo "    Unknown OpenFOAM compiler type $WM_COMPILER"
                 echo "    Please check your settings"
                 echo
@@ -238,14 +239,15 @@ switch $foamCompiler
             # 64-bit needs lib64, but 32-bit needs lib (not lib32)
             test "$WM_ARCH_OPTION" = 64;
                 and prependToVar LD_LIBRARY_PATH $gccDir/lib$WM_COMPILER_LIB_ARCH;
-                or prependToVar LD_LIBRARY_PATH $gccDir/lib
+                or  prependToVar LD_LIBRARY_PATH $gccDir/lib
 
             # add gmp/mpfr libraries to run-time environment
             prependToVar LD_LIBRARY_PATH $gmpDir/lib
             prependToVar LD_LIBRARY_PATH $mpfrDir/lib
 
             # add mpc libraries (not need for older gcc) to run-time environment
-            test -n "$mpc_version"; and prependToVar LD_LIBRARY_PATH $mpcDir/lib
+            test -n "$mpc_version";
+                and prependToVar LD_LIBRARY_PATH $mpcDir/lib
 
             # used by boost/CGAL:
             set -x MPFR_ARCH_PATH $mpfrDir
@@ -293,7 +295,7 @@ end
 if test -n "$WM_CXXFLAGS"
     switch "$WM_COMPILER"
         case Gcc*++0x
-            set -g WM_CXXFLAGS $WM_CXXFLAGS -std=c++0x
+            set -gx WM_CXXFLAGS $WM_CXXFLAGS -std=c++0x
     end
 end
 
@@ -308,18 +310,15 @@ set -x BOOST_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost
 set -x CGAL_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version
 
 # enabled if CGAL is available
-if set -q FOAM_VERBOSE; and set -q PS1
-    echo "Checking for"
-    echo "    $cgal_version at $CGAL_ARCH_PATH"
-    echo "    $boost_version at $BOOST_ARCH_PATH"
-end
+foamPrintDebug "Checking for"
+foamPrintDebug "    $cgal_version at $CGAL_ARCH_PATH"
+foamPrintDebug "    $boost_version at $BOOST_ARCH_PATH"
 
 if test -d "$CGAL_ARCH_PATH"
-    if test -d "$BOOST_ARCH_PATH"
-        prependToVar LD_LIBRARY_PATH $BOOST_ARCH_PATH/lib
-    else
-        set -e BOOST_ARCH_PATH
-    end
+    test -d "$BOOST_ARCH_PATH";
+        and prependToVar LD_LIBRARY_PATH $BOOST_ARCH_PATH/lib;
+        or  set -e BOOST_ARCH_PATH
+
     prependToVar LD_LIBRARY_PATH $CGAL_ARCH_PATH/lib
 else
     set -e BOOST_ARCH_PATH
@@ -367,12 +366,10 @@ switch "$WM_MPLIB"
         # include files and libraries.
         set -x MPI_ARCH_PATH (dirname $libDir)
 
-        if set -q FOAM_VERBOSE; and set -q PS1
-            echo "Using system installed MPI:"
-            echo "    compile flags : $PINC"
-            echo "    link flags    : $PLIBS"
-            echo "    libmpi dir    : $libDir"
-        end
+        foamPrintDebug "Using system installed MPI:"
+        foamPrintDebug "    compile flags : $PINC"
+        foamPrintDebug "    link flags    : $PLIBS"
+        foamPrintDebug "    libmpi dir    : $libDir"
 
         prependToVar LD_LIBRARY_PATH $libDir
     case MPICH
@@ -447,11 +444,9 @@ switch "$WM_MPLIB"
         #    echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
         #fi
 
-        if set -q FOAM_VERBOSE; and set -q PS1
-            echo "Using SGI MPT:"
-            echo "    MPI_ROOT : $MPI_ROOT"
-            echo "    FOAM_MPI : $FOAM_MPI"
-        end
+        foamPrintDebug "Using SGI MPT:"
+        foamPrintDebug "    MPI_ROOT : $MPI_ROOT"
+        foamPrintDebug "    FOAM_MPI : $FOAM_MPI"
 
         prependToVar PATH $MPI_ARCH_PATH/bin
         prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib
@@ -473,11 +468,9 @@ switch "$WM_MPLIB"
         #    echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
         #fi
 
-        if set -q FOAM_VERBOSE; and set -q PS1
-            echo "Using INTEL MPI:"
-            echo "    MPI_ROOT : $MPI_ROOT"
-            echo "    FOAM_MPI : $FOAM_MPI"
-        end
+        foamPrintDebug "Using INTEL MPI:"
+        foamPrintDebug "    MPI_ROOT : $MPI_ROOT"
+        foamPrintDebug "    FOAM_MPI : $FOAM_MPI"
 
         prependToVar PATH $MPI_ARCH_PATH/bin64
         prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib64
@@ -494,11 +487,11 @@ test "$FOAM_MPI" != dummy;
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 set -q minBufferSize;
-    or set -l minBufferSize 20000000
+    or  set -l minBufferSize 20000000;
+    and set -x MPI_BUFFER_SIZE $minBufferSize
 
-set -q MPI_BUFFER_SIZE;
-    or math ""$MPI_BUFFER_SIZE" < $minBufferSize";
-        and set -x MPI_BUFFER_SIZE $minBufferSize
+set -q MPI_BUFFER_SIZE; or math "$MPI_BUFFER_SIZE" < "$minBufferSize";
+    and set -x MPI_BUFFER_SIZE $minBufferSize
 
 set -e foamCompiler
 set -e minBufferSize

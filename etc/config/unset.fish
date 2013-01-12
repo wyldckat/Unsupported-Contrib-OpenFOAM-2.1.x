@@ -119,6 +119,8 @@ foamClean LD_LIBRARY_PATH $foamOldDirs
 foamClean MANPATH $foamOldDirs
 
 functions -e foamClean
+functions -e foamDebug
+functions -e foamSource
 functions -e prependToVar
 set -e cleaned
 set -e foamOldDirs

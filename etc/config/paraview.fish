@@ -46,7 +46,7 @@ for cmakeVersion in $cmakeVersions
     set -l cmake $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cmakeVersion
 
     if test -r $cmake
-        set -x CMAKE_HOME $cmake
+        set -gx CMAKE_HOME $cmake
         prependToVar PATH $CMAKE_HOME/bin
         break
     end
@@ -66,22 +66,22 @@ end
 
 switch "$ParaView_VERSION"
     case (echo $ParaView_VERSION | grep -e "[0-9]*")
-        set -x ParaView_MAJOR (echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
+        set -gx ParaView_MAJOR (echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
 end
 
 set -l paraviewInstDir $WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
-set -x ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-$ParaView_VERSION
+set -gx ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-$ParaView_VERSION
 
 if test -r $ParaView_DIR; or test -r $paraviewInstDir
     prependToVar PATH $ParaView_DIR/bin
     prependToVar LD_LIBRARY_PATH $ParaView_DIR/lib/paraview-$ParaView_MAJOR $LD_LIBRARY_PATH
-    set -x PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-$ParaView_MAJOR
+    set -gx PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-$ParaView_MAJOR
 
     # add in python libraries if required
     set -l paraviewPython $ParaView_DIR/Utilities/VTKPythonWrapping
 
-    if test -r $paraviewPython
-        set -x PYTHONPATH $PYTHONPATH $paraviewPython $ParaView_DIR/lib/paraview-$ParaView_MAJOR
+    if test -r "$paraviewPython"
+        set -gx PYTHONPATH $PYTHONPATH $paraviewPython $ParaView_DIR/lib/paraview-$ParaView_MAJOR
     end
 else
     set -e PV_PLUGIN_PATH

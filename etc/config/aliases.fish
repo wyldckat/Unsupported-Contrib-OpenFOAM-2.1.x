@@ -50,7 +50,7 @@ end
 #  - also need to set WM_HOSTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function wmSchedON
-    set -x WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler
+    set -gx WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler
 end
 
 function wmSchedOFF
