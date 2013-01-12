@@ -115,6 +115,10 @@ Usage
     \param -i \n
     This is a short-cut for \a -inplace.
 
+    \param -enableFunctions \n
+    Enable function entries. Only available for OpenFOAM >= 2.0, older versions
+    always evaluate function entries.
+
 Note
     All comments present in the input will be stripped from the output and the
     standard header and footer comments will be added. This is due to the
@@ -426,6 +430,14 @@ void initArgList()
         "This is short for -inplace."
     );
 
+#if FOAM_HEX_VERSION >= 0x200
+    ADD_BOOL_OPTION
+    (
+        "enableFunctions",
+        "Evaluate function entries such as #include."
+    );
+#endif
+
     argList::noBanner();
     argList::noParallel();
     REMOVE_OPTION("case");
@@ -544,6 +556,11 @@ int main(int argc, char *argv[])
         default:
             break;
     }
+
+#if FOAM_HEX_VERSION >= 0x200
+    // Whether to enable function entries
+    entry::disableFunctionEntries = !args.optionFound("enableFunctions");
+#endif
 
     // Read dictionary
     if (!args.optionFound("dict"))
