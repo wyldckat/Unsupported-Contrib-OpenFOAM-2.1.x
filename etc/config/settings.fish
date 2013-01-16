@@ -427,14 +427,8 @@ switch "$WM_MPLIB"
         prependToVar PATH $MPI_ARCH_PATH/bin
         prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib
     case SGIMPI
-        #lastCharID=$(( ${#MPI_ROOT} - 1 ))
-        #if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-        #then
-        #    MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-        #fi
-
-        #set -x FOAM_MPI ${MPI_ROOT##*/}
-        #set -x MPI_ARCH_PATH $MPI_ROOT
+        set -x FOAM_MPI (echo $MPI_ROOT | sed -e 's#/$##')
+        set -x MPI_ARCH_PATH $MPI_ROOT
 
         if begin; not test -d $MPI_ROOT; or test -z $MPI_ARCH_PATH; end
             echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
@@ -450,14 +444,8 @@ switch "$WM_MPLIB"
         prependToVar PATH $MPI_ARCH_PATH/bin
         prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib
     case INTELMPI
-        #lastCharID=$(( ${#MPI_ROOT} - 1 ))
-        #if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-        #then
-        #    MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-        #fi
-
-        #set -x FOAM_MPI ${MPI_ROOT##*/}
-        #set -x MPI_ARCH_PATH $MPI_ROOT
+        set -x FOAM_MPI (echo $MPI_ROOT | sed -e 's#/$##')
+        set -x MPI_ARCH_PATH $MPI_ROOT
 
         if begin; not test -d $MPI_ROOT; or test -z $MPI_ARCH_PATH; end
             echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
