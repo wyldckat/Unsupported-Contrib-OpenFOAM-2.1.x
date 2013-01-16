@@ -436,13 +436,12 @@ switch "$WM_MPLIB"
         #set -x FOAM_MPI ${MPI_ROOT##*/}
         #set -x MPI_ARCH_PATH $MPI_ROOT
 
-        #if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
-        #then
-        #    echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
-        #    echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
-        #    echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
-        #    echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
-        #fi
+        if begin; not test -d $MPI_ROOT; or test -z $MPI_ARCH_PATH; end
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+            echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
+            echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
+            echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
+        end
 
         foamPrintDebug "Using SGI MPT:"
         foamPrintDebug "    MPI_ROOT : $MPI_ROOT"
@@ -460,13 +459,12 @@ switch "$WM_MPLIB"
         #set -x FOAM_MPI ${MPI_ROOT##*/}
         #set -x MPI_ARCH_PATH $MPI_ROOT
 
-        #if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
-        #then
-        #    echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
-        #    echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
-        #    echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
-        #    echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
-        #fi
+        if begin; not test -d $MPI_ROOT; or test -z $MPI_ARCH_PATH; end
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+            echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
+            echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
+            echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
+        end
 
         foamPrintDebug "Using INTEL MPI:"
         foamPrintDebug "    MPI_ROOT : $MPI_ROOT"
