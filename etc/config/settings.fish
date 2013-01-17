@@ -56,7 +56,7 @@ switch "$WM_ARCH"
                         set -x WM_CXXFLAGS -m32 -fPIC
                         set -x WM_LDFLAGS -m32
                     case 64
-                        set -g WM_ARCH linux64
+                        set -x WM_ARCH linux64
                         set -x WM_COMPILER_LIB_ARCH 64
                         set -x WM_CC gcc
                         set -x WM_CXX g++
@@ -67,11 +67,11 @@ switch "$WM_ARCH"
                         echo "Unknown WM_ARCH_OPTION $WM_ARCH_OPTION, should be 32 or 64"
                 end
             case ia64
-                set -g WM_ARCH linuxIA64
+                set -x WM_ARCH linuxIA64
                 set -x WM_COMPILER I64
             case mips64
-                set -g WM_ARCH SiCortex64
-                set -g WM_MPLIB MPI
+                set -x WM_ARCH SiCortex64
+                set -x WM_MPLIB MPI
                 set -x WM_COMPILER_LIB_ARCH 64
                 set -x WM_CC gcc
                 set -x WM_CXX g++
@@ -79,7 +79,7 @@ switch "$WM_ARCH"
                 set -x WM_CXXFLAGS -mabi=64 -fPIC
                 set -x WM_LDFLAGS -mabi=64 -G0
             case ppc64
-                set -g WM_ARCH linuxPPC64
+                set -x WM_ARCH linuxPPC64
                 set -x WM_COMPILER_LIB_ARCH 64
                 set -x WM_CC gcc
                 set -x WM_CXX g++
@@ -90,8 +90,8 @@ switch "$WM_ARCH"
                 echo Unknown processor type (uname -m) for Linux
         end
     case SunOS
-        set -g WM_ARCH SunOS64
-        set -g WM_MPLIB FJMPI
+        set -x WM_ARCH SunOS64
+        set -x WM_MPLIB FJMPI
         set -x WM_COMPILER_LIB_ARCH 64
         set -x WM_CC gcc
         set -x WM_CXX g++
