@@ -65,7 +65,7 @@ for i in $argv
 end
 
 switch "$ParaView_VERSION"
-    case (echo $ParaView_VERSION | grep -e "[0-9]*")
+    case (echo $ParaView_VERSION | command grep -e "[0-9]*")
         set -gx ParaView_MAJOR (echo $ParaView_VERSION | sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
 end
 
@@ -73,9 +73,26 @@ set -l paraviewInstDir $WM_THIRD_PARTY_DIR/ParaView-$ParaView_VERSION
 set -gx ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-$ParaView_VERSION
 
 if test -r $ParaView_DIR; or test -r $paraviewInstDir
+
+    set -gx ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-$ParaView_MAJOR
+    not test -d $ParaView_INCLUDE_DIR;
+        and test -d $ParaView_DIR/include/paraview;
+        and set -gx ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview
+
+    set -l ParaView_LIB_DIR $ParaView_DIR/lib/paraview-$ParaView_MAJOR
+    not test -d $ParaView_LIB_DIR;
+        and test -d $ParaView_DIR/include/paraview;
+        and set -gx ParaView_LIB_DIR $ParaView_DIR/lib/paraview
+
     prependToVar PATH $ParaView_DIR/bin
-    prependToVar LD_LIBRARY_PATH $ParaView_DIR/lib/paraview-$ParaView_MAJOR $LD_LIBRARY_PATH
+    prependToVar LD_LIBRARY_PATH $ParaView_LIB_DIR
     set -gx PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-$ParaView_MAJOR
+
+    foamPrintDebug "Using paraview"
+    foamPrintDebug "    ParaView_DIR         : $ParaView_DIR"
+    foamPrintDebug "    ParaView_LIB_DIR     : $ParaView_LIB_DIR"
+    foamPrintDebug "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
+    foamPrintDebug "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
 
     # add in python libraries if required
     set -l paraviewPython $ParaView_DIR/Utilities/VTKPythonWrapping

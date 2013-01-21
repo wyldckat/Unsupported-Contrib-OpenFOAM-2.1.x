@@ -352,6 +352,7 @@ switch "$WM_MPLIB"
 
         prependToVar PATH $MPI_ARCH_PATH/bin
         prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib
+        prependToVar LD_LIBRARY_PATH $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
         prependToVar MANPATH $MPI_ARCH_PATH/man
     case SYSTEMOPENMPI
         # Use the system installed openmpi, get library directory via mpicc
