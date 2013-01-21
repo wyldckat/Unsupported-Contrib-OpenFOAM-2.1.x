@@ -54,8 +54,8 @@ end
 
 
 #- ParaView version, automatically determine major version
-set -x ParaView_VERSION 3.12.0
-set -x ParaView_MAJOR detect
+set -gx ParaView_VERSION 3.12.0
+set -gx ParaView_MAJOR detect
 # Evaluate command-line parameters for ParaView
 for i in $argv
     switch $i
@@ -75,14 +75,14 @@ set -gx ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview
 if test -r $ParaView_DIR; or test -r $paraviewInstDir
 
     set -gx ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-$ParaView_MAJOR
-    not test -d $ParaView_INCLUDE_DIR;
-        and test -d $ParaView_DIR/include/paraview;
-        and set -gx ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview
+    if not test -d $ParaView_INCLUDE_DIR; and test -d $ParaView_DIR/include/paraview
+        set -gx ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview
+    end
 
     set -l ParaView_LIB_DIR $ParaView_DIR/lib/paraview-$ParaView_MAJOR
-    not test -d $ParaView_LIB_DIR;
-        and test -d $ParaView_DIR/include/paraview;
-        and set -gx ParaView_LIB_DIR $ParaView_DIR/lib/paraview
+    if not test -d $ParaView_LIB_DIR; and test -d $ParaView_DIR/include/paraview
+        set ParaView_LIB_DIR $ParaView_DIR/lib/paraview
+    end
 
     prependToVar PATH $ParaView_DIR/bin
     prependToVar LD_LIBRARY_PATH $ParaView_LIB_DIR
