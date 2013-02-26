@@ -76,8 +76,8 @@ Please follow the steps below to contribute to the
     already), by going to https://github.com and selecting *Sign up for Free*.
 2.  Log into your account, and go to the [*Unsupported-Contrib-OpenFOAM user
     account*][user].
-3.  From the *Repositories* tab, select the repository version (*e.g.* 2.1.x)
-    to which you wish to contribute.
+3.  From the *Repositories* tab, select the repository version (<em>e.g.</em>
+    2.1.x) to which you wish to contribute.
 4.  Click the *Fork* button to create a forked repository in your own user
     account.
 5.  Clone your forked repository onto your local machine, *e.g.* by the
